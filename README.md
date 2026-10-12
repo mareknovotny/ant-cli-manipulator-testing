@@ -69,7 +69,7 @@ you're done looking.
 ## projects.conf format
 
 ```
-name|relative-dir-under-antprojects|git-ref|deploy-version
+name|relative-dir-under-antprojects|git-ref|deploy-version|group-id|artifact-id
 ```
 
 - `name` — identifier passed as the first arg to `run-tests.sh`; multiple
@@ -84,6 +84,15 @@ name|relative-dir-under-antprojects|git-ref|deploy-version
   (and tag-naming conventions differ wildly — e.g. `NET_1_4_0`, `r4.9`,
   `dom4j_1_6_1`, `xalan-j_2_7_3-rc10`).
 - `deploy-version` — value passed as `-Dmaven.asf.release.deploy.version`.
+- `group-id` / `artifact-id` — optional, leave both blank for projects with
+  real `pom.xml`/`ivy.xml`/`.pom`-template coordinates already in the tree.
+  Set both only for a project whose Ant build declares no groupId/artifactId
+  anywhere (e.g. Xalan) — without them the tool has nothing to attach a
+  discovered version to, and the whole run is a guaranteed no-op. When set,
+  they're passed through as `-Dalignment.groupId`/`-Dalignment.artifactId`,
+  and `deploy-version` doubles as `-Dalignment.version` (the project's own
+  version property is often not in a form the resolver recognises either —
+  e.g. Xalan's own `version` property is `2_7_3`, underscored).
 
 Lines starting with `#` and blank lines are ignored.
 
@@ -120,9 +129,11 @@ to override them:
   label in `projects.conf`.
 - **commons-net `1.4.1`** has no tag either; it uses the nearest tagged
   release, `NET_1_4_0`, as its source tree instead.
-- **xalan-java `2.7.3`** has no final release tag, only
-  `xalan-j_2_7_3-rc10`; running it currently produces zero rewrites (the CLI
-  finds no alignable coordinates in that build.xml).
+- **xalan-java `2.7.3`** has no final release tag, only `xalan-j_2_7_3-rc10`.
+  Its Ant build also declares no groupId/artifactId anywhere in the tree, so
+  it needs the `group-id`/`artifact-id` override columns set (to the
+  well-known published coordinate `xalan:xalan`) — without them the run is a
+  guaranteed no-op.
 
 See each entry's comment in `projects.conf` for details.
 

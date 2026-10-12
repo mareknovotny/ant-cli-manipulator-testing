@@ -62,14 +62,16 @@ done
 # --- load selected projects from config ---------------------------------------
 [ -f "$PROJECTS_CONF" ] || { echo "projects config not found: $PROJECTS_CONF"; exit 1; }
 
-declare -a SELECTED_NAMES SELECTED_DIRS SELECTED_REFS SELECTED_VERSIONS
-while IFS='|' read -r name dir ref version; do
+declare -a SELECTED_NAMES SELECTED_DIRS SELECTED_REFS SELECTED_VERSIONS SELECTED_GROUP_IDS SELECTED_ARTIFACT_IDS
+while IFS='|' read -r name dir ref version group_id artifact_id; do
     case "$name" in ''|'#'*) continue ;; esac
     if [ -n "$RUN_ALL" ] || [ "$name" = "$TARGET_NAME" ]; then
         SELECTED_NAMES+=("$name")
         SELECTED_DIRS+=("$dir")
         SELECTED_REFS+=("$ref")
         SELECTED_VERSIONS+=("$version")
+        SELECTED_GROUP_IDS+=("$group_id")
+        SELECTED_ARTIFACT_IDS+=("$artifact_id")
     fi
 done < "$PROJECTS_CONF"
 
@@ -91,6 +93,8 @@ for i in "${!SELECTED_NAMES[@]}"; do
     dir="${SELECTED_DIRS[$i]}"
     ref="${SELECTED_REFS[$i]}"
     version="${SELECTED_VERSIONS[$i]}"
+    group_id="${SELECTED_GROUP_IDS[$i]}"
+    artifact_id="${SELECTED_ARTIFACT_IDS[$i]}"
     project_dir="$ANTPROJECTS/$dir"
 
     echo "=== $name @ $ref (deploy-version $version) ==="
@@ -114,7 +118,7 @@ for i in "${!SELECTED_NAMES[@]}"; do
     echo "    log: $log_file"
 
     if [ -f "$build_file" ]; then
-        if run_ant_manipulation "$JAR" "$build_file" "$version" "$DA_URL" "$TOKEN" "$PREVIEW" > >(tee "$log_file") 2>&1; then
+        if run_ant_manipulation "$JAR" "$build_file" "$version" "$DA_URL" "$TOKEN" "$PREVIEW" "$group_id" "$artifact_id" > >(tee "$log_file") 2>&1; then
             rc=0
         else
             rc=$?
