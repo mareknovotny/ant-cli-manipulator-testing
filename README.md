@@ -127,8 +127,12 @@ to override them:
   `1.9.14.redhat-...`, not `1.9.11.*`. The CLI derives the version from
   whatever's literally in the file; it has no awareness of the `1.9.11`
   label in `projects.conf`.
-- **commons-net `1.4.1`** has no tag either; it uses the nearest tagged
-  release, `NET_1_4_0`, as its source tree instead.
+- **commons-net `1.4.1`** has no tag either, but the real 1.4.1 source does
+  exist — as the `NET_1_4_1` *branch* (git-svn migrated it to
+  `refs/heads/NET_1_4_1` rather than a tag, which is why `git tag` never
+  finds it). As with jackson-1 above, resolving it by bare name in the
+  worktree checkout requires a local branch named `NET_1_4_1` in
+  `antprojects/commons-net`, not just a remote-tracking ref.
 - **xalan-java `2.7.3`** has no final release tag, only `xalan-j_2_7_3-rc10`.
   Its Ant build also declares no groupId/artifactId anywhere in the tree, so
   it needs the `group-id`/`artifact-id` override columns set (to the
